@@ -12,7 +12,8 @@
     </div>
     <why-u-c-t class="py-4" />
     <our-work class="mt-20 py-4 !bg-white" />
-    <uctwhy class="mt-20 py-4" />
+    <!-- <uctwhy class="mt-20 py-4" /> -->
+    <NewPage class="mt-20 py-4" />
   </div>
 </template>
 
@@ -20,4 +21,5 @@
 import Header from "~/components/layout/Header.vue";
 import OurFields from "@/components/views/ourFields.vue";
 import WhyUCT from "@/components/views/whyUCT.vue";
+import NewPage from "@/components/views/NewPage.vue";
 </script>
