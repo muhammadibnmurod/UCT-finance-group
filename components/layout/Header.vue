@@ -1,48 +1,438 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from "vue";
 import Logo from "@/assets/images/Logo.png";
 
-const navItems = [
-  "Bosh sahifa",
-  "Biz haqimizda",
-  "Xizmatlar",
-  "Narxlar",
-  "Yangiliklar",
-  "Mijozlar",
-  "Kontaktlar"
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface NavItem {
+  label: string;
+  href: string;
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const navItems: NavItem[] = [
+  { label: "Bosh sahifa", href: "#home" },
+  { label: "Biz haqimizda", href: "#about" },
+  { label: "Xizmatlar", href: "#services" },
+  { label: "Narxlar", href: "#pricing" },
+  { label: "Yangiliklar", href: "#news" },
+  { label: "Mijozlar", href: "#clients" },
+  { label: "Kontaktlar", href: "#contact" }
 ];
+
+// ─── Scroll state ─────────────────────────────────────────────────────────────
+const isScrolled = ref(false);
+const activeIndex = ref(0);
+const mobileOpen = ref(false);
+
+function onScroll() {
+  isScrolled.value = window.scrollY > 24;
+}
+
+function setActive(i: number) {
+  activeIndex.value = i;
+  mobileOpen.value = false;
+}
+
+onMounted(() => window.addEventListener("scroll", onScroll, { passive: true }));
+onUnmounted(() => window.removeEventListener("scroll", onScroll));
 </script>
 
 <template>
-  <header class="w-full rounded-2xl">
-    <div
-      class="flex items-center justify-between rounded-xl bg-[#EDECEF] px-10 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.05)]"
-    >
-      <a href="#" class="shrink-0">
-        <img :src="Logo" alt="UCT Finance Group" class="h-10 w-auto" />
+  <header class="site-header" :class="{ 'is-scrolled': isScrolled }">
+    <div class="header-inner">
+      <!-- Logo -->
+      <a
+        href="#"
+        class="header-logo"
+        aria-label="UCT Finance Group — bosh sahifa"
+      >
+        <img :src="Logo" alt="UCT Finance Group" class="logo-img" />
       </a>
 
-      <nav class="mx-6 hidden flex-1 items-center justify-center gap-6 lg:flex">
+      <!-- Desktop nav -->
+      <nav class="desktop-nav" aria-label="Asosiy menyu">
         <a
-          v-for="(item, index) in navItems"
-          :key="item"
-          href="#"
-          class="text-sm font-manrope text-[#2F2E3A] transition-colors hover:text-[#1BAE66]"
-          :class="index === 0 ? 'text-[#1BAE66]' : ''"
+          v-for="(item, i) in navItems"
+          :key="item.label"
+          :href="item.href"
+          class="nav-link font-manrope"
+          :class="{ 'is-active': activeIndex === i }"
+          @click.prevent="setActive(i)"
         >
-          {{ item }}
+          {{ item.label }}
+          <span class="nav-indicator" aria-hidden="true" />
         </a>
       </nav>
 
-      <div class="shrink-0">
+      <!-- CTA + hamburger -->
+      <div class="header-actions">
         <button
           type="button"
-          class="rounded-xl bg-[#2CB36C] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#23985b]"
+          class="cta-btn font-manrope"
+          aria-label="Bepul konsultatsiya"
         >
-          Bepul konsultatsiya
+          <span>Bepul konsultatsiya</span>
+          <svg
+            class="cta-arrow"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 8h10M9 4l4 4-4 4"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <!-- Hamburger (mobile) -->
+        <button
+          type="button"
+          class="hamburger"
+          :class="{ 'is-open': mobileOpen }"
+          :aria-expanded="mobileOpen"
+          aria-controls="mobile-menu"
+          aria-label="Menyuni ochish"
+          @click="mobileOpen = !mobileOpen"
+        >
+          <span /><span /><span />
         </button>
       </div>
     </div>
+
+    <!-- Mobile menu -->
+    <Transition name="mobile-menu">
+      <nav
+        v-if="mobileOpen"
+        id="mobile-menu"
+        class="mobile-nav"
+        aria-label="Mobil menyu"
+      >
+        <a
+          v-for="(item, i) in navItems"
+          :key="item.label"
+          :href="item.href"
+          class="mobile-link font-manrope"
+          :class="{ 'is-active': activeIndex === i }"
+          :style="{ animationDelay: `${i * 45}ms` }"
+          @click.prevent="setActive(i)"
+        >
+          {{ item.label }}
+        </a>
+      </nav>
+    </Transition>
   </header>
 </template>
 
-<style scoped lang="css"></style>
+<style scoped lang="css">
+/* ── Header shell ────────────────────────────────────────── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  padding: 12px 0;
+  transition: padding 0.35s ease;
+}
+
+.site-header.is-scrolled {
+  padding: 6px 0;
+}
+
+/* ── Inner bar ───────────────────────────────────────────── */
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 28px;
+  background: #edecef;
+  padding: 16px 25px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    padding 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+.site-header.is-scrolled .header-inner {
+  padding: 12px 20px;
+  background: rgba(237, 236, 239, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.header-logo {
+  flex-shrink: 0;
+  display: block;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.header-logo:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+.logo-img {
+  height: 60px;
+  width: 124px;
+  object-fit: contain;
+  transition:
+    height 0.35s ease,
+    width 0.35s ease;
+}
+
+.site-header.is-scrolled .logo-img {
+  height: 48px;
+  width: 100px;
+}
+
+/* ── Desktop nav ─────────────────────────────────────────── */
+.desktop-nav {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 24px;
+}
+
+@media (max-width: 1024px) {
+  .desktop-nav {
+    display: none;
+  }
+}
+
+.nav-link {
+  position: relative;
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #2f2e3a;
+  text-decoration: none;
+  border-radius: 10px;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: #1bae66;
+  background: rgba(27, 174, 102, 0.07);
+}
+
+.nav-link.is-active {
+  color: #1bae66;
+}
+
+/* Animated underline indicator */
+.nav-indicator {
+  position: absolute;
+  bottom: 2px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  border-radius: 99px;
+  background: #1bae66;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-link.is-active .nav-indicator,
+.nav-link:hover .nav-indicator {
+  transform: scaleX(1);
+}
+
+/* ── Actions ─────────────────────────────────────────────── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* ── CTA button ──────────────────────────────────────────── */
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  background: #2cb36c;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  transition:
+    background 0.25s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    padding 0.35s ease;
+}
+
+.site-header.is-scrolled .cta-btn {
+  padding: 10px 22px;
+  font-size: 15px;
+}
+
+.cta-btn:hover {
+  background: #23985b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(44, 179, 108, 0.35);
+}
+
+.cta-btn:active {
+  transform: scale(0.96);
+}
+
+.cta-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+}
+
+.cta-btn:hover .cta-arrow {
+  transform: translateX(3px);
+}
+
+@media (max-width: 640px) {
+  .cta-btn span {
+    display: none;
+  }
+  .cta-btn {
+    padding: 10px 14px;
+  }
+  .cta-arrow {
+    display: block;
+  }
+}
+
+/* ── Hamburger ───────────────────────────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.hamburger:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+  }
+}
+
+.hamburger span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: #2f2e3a;
+  transform-origin: center;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease,
+    width 0.3s ease;
+}
+
+.hamburger span:nth-child(3) {
+  width: 65%;
+}
+
+.hamburger.is-open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger.is-open span:nth-child(3) {
+  width: 100%;
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile nav ──────────────────────────────────────────── */
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px 16px;
+  margin-top: 8px;
+  border-radius: 20px;
+  background: rgba(237, 236, 239, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-link {
+  display: block;
+  padding: 13px 14px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #2f2e3a;
+  text-decoration: none;
+  border-radius: 12px;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+
+  opacity: 0;
+  animation: mobileItemIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.mobile-link:hover,
+.mobile-link.is-active {
+  color: #1bae66;
+  background: rgba(27, 174, 102, 0.09);
+}
+
+@keyframes mobileItemIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Mobile menu transition ──────────────────────────────── */
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.97);
+}
+</style>

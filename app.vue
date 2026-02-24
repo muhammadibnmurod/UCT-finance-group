@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { ElConfigProvider } from 'element-plus'
-import { useElementLocale } from '@/composables/useElementLocale'
-import 'element-plus/theme-chalk/dark/css-vars.css'
-
-const { elLocale } = useElementLocale()
+import { ElConfigProvider } from "element-plus";
+import "element-plus/theme-chalk/dark/css-vars.css";
+//
+// const { elLocale } = useElementLocale();
 </script>
 
 <template>
-  <ElConfigProvider :locale="elLocale">
+  <ElConfigProvider>
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
