@@ -116,7 +116,7 @@ onUnmounted(() => observer?.disconnect());
 
 <template>
   <section class="our-work" ref="sectionRef" :class="{ 'is-visible': visible }">
-    <div class="mx-auto w-full max-w-[1260px]">
+    <div class="mx-auto w-full max-w-[1220px] px-4">
       <!-- Header -->
       <div class="pricing-header">
         <h2 class="pricing-title font-syne">TARIF REJALARI</h2>

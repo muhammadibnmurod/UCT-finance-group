@@ -52,7 +52,7 @@ const paused = ref(false);
 
 <template>
   <section class="uct-why">
-    <div class="mx-auto w-full max-w-[1220px]">
+    <div class="mx-auto w-full max-w-[1220px] px-4">
       <!-- Header -->
       <div class="why-header">
         <h2 class="why-title font-syne">NEGA AYNAN UCT FINANCE GROUP?</h2>

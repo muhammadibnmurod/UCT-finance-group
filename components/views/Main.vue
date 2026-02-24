@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import MainImage from "@/assets/images/MainImage.png";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HeroSlide {
   name: string;
-  label: string;
-  title: string[]; // Each line of the heading
+  title: string[];
   description: string;
   primaryBtn: string;
   secondaryBtn: string;
-  accentColor: string; // Used for gradient tweaks per slide
+  gradient: string; // full background gradient per slide
+  overlay: string; // radial accent overlay per slide
 }
 
 // ─── Slide Data ───────────────────────────────────────────────────────────────
 const slides: HeroSlide[] = [
   {
     name: "model",
-    label: "Moliyaviy model",
     title: [
       "Moliyani tartibga soling.",
       "Foydani oshiring.",
@@ -27,82 +26,120 @@ const slides: HeroSlide[] = [
       "Biz biznesingizning moliyaviy modelini quramiz, pul oqimini nazorat qilamiz va strategik qarorlar uchun aniq raqamlar beramiz.",
     primaryBtn: "Bepul konsultatsiya",
     secondaryBtn: "Tijoriy taklif olish",
-    accentColor: "rgba(147, 226, 92, 0.32)"
+    gradient:
+      "linear-gradient(96deg, #204407 0%, #0f6a70 41%, #1d8278 67%, #6fa83e 100%)",
+    overlay:
+      "radial-gradient(42% 68% at 84% 47%, rgba(147,226,92,0.32) 0%, transparent 74%)"
   },
   {
     name: "profit",
-    label: "Foyda o'sishi",
     title: ["Daromadingizni", "ikki baravarga", "oshiring."],
     description:
       "Moliyaviy tahlil va prognozlash orqali biznesingiz foydasini maksimal darajaga ko'taramiz.",
     primaryBtn: "Tahlilni boshlash",
     secondaryBtn: "Ko'proq ma'lumot",
-    accentColor: "rgba(92, 200, 147, 0.35)"
+    gradient:
+      "linear-gradient(96deg, #0a3d1f 0%, #146b3a 40%, #2a9058 67%, #4fc87a 100%)",
+    overlay:
+      "radial-gradient(42% 68% at 84% 47%, rgba(92,200,147,0.38) 0%, transparent 74%)"
   },
   {
     name: "manage",
-    label: "Biznes boshqaruvi",
     title: ["Biznesingizni", "professional", "boshqaring."],
     description:
       "Strategik rejalashtirish va moliyaviy nazorat tizimi orqali biznesingizni yangi bosqichga olib chiqamiz.",
     primaryBtn: "Strategiya tuzish",
     secondaryBtn: "Namuna ko'rish",
-    accentColor: "rgba(110, 180, 255, 0.22)"
+    gradient:
+      "linear-gradient(96deg, #062840 0%, #0d5068 41%, #1a7a8a 67%, #3aabb5 100%)",
+    overlay:
+      "radial-gradient(42% 68% at 84% 47%, rgba(110,200,255,0.28) 0%, transparent 74%)"
   }
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
-const activeTab = ref(slides[0].name);
+const current = ref(0);
 const isTransitioning = ref(false);
-const prevTab = ref(slides[0].name);
+const contentKey = ref(0); // forces re-mount of animated content
 
-const currentSlide = computed(
-  () => slides.find(s => s.name === activeTab.value) ?? slides[0]
-);
+const currentSlide = computed(() => slides[current.value]);
 
-// Trigger transition class on tab change
-watch(activeTab, (next, prev) => {
-  if (next === prev) return;
-  prevTab.value = prev;
+// Progress bar (fills over INTERVAL ms, resets on change)
+const progress = ref(0);
+const INTERVAL = 5000;
+const TICK = 50;
+let progressTimer: ReturnType<typeof setInterval> | null = null;
+let slideTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearTimers() {
+  if (progressTimer) clearInterval(progressTimer);
+  if (slideTimer) clearTimeout(slideTimer);
+}
+
+function goTo(index: number) {
+  if (index === current.value) return;
   isTransitioning.value = true;
-  setTimeout(() => (isTransitioning.value = false), 420);
-});
+  setTimeout(() => {
+    current.value = index;
+    contentKey.value++;
+    isTransitioning.value = false;
+  }, 380);
+}
 
-function selectTab(name: string) {
-  if (name !== activeTab.value) activeTab.value = name;
+function next() {
+  goTo((current.value + 1) % slides.length);
+}
+
+function startCycle() {
+  clearTimers();
+  progress.value = 0;
+
+  progressTimer = setInterval(() => {
+    progress.value += (TICK / INTERVAL) * 100;
+    if (progress.value >= 100) progress.value = 100;
+  }, TICK);
+
+  slideTimer = setTimeout(() => {
+    next();
+    startCycle();
+  }, INTERVAL);
+}
+
+onMounted(startCycle);
+onUnmounted(clearTimers);
+
+// Manual dot click — restart cycle from that slide
+function selectSlide(i: number) {
+  clearTimers();
+  goTo(i);
+  setTimeout(startCycle, 380);
 }
 </script>
 
 <template>
   <section class="main-hero">
-    <!-- ── Tab indicators ── -->
-    <div class="hero-tabs-bar" role="tablist" :aria-label="'Hero navigation'">
-      <button
-        v-for="slide in slides"
-        :key="slide.name"
-        role="tab"
-        :aria-selected="activeTab === slide.name"
-        :aria-label="slide.label"
-        class="hero-tab-btn"
-        :class="{ 'is-active': activeTab === slide.name }"
-        @click="selectTab(slide.name)"
-      >
-        <span class="hero-tab-line" />
-        <span class="hero-tab-tooltip">{{ slide.label }}</span>
-      </button>
-    </div>
-
     <!-- ── Card ── -->
     <div
       class="hero-card"
       :class="{ 'is-transitioning': isTransitioning }"
-      :style="{ '--accent': currentSlide.accentColor }"
+      :style="{ background: currentSlide.gradient }"
     >
-      <!-- Background overlays -->
-      <div class="hero-bg-overlay" aria-hidden="true" />
+      <!-- Overlay (accent glow, shifts per slide) -->
+      <div
+        class="hero-bg-overlay"
+        :style="{
+          background: `radial-gradient(52% 80% at 12% 50%, rgba(0,0,0,0.5) 0%, transparent 70%), ${currentSlide.overlay}`
+        }"
+        aria-hidden="true"
+      />
+
+      <!-- Floating dots -->
+      <div class="hero-dots" aria-hidden="true">
+        <span v-for="n in 6" :key="n" class="hero-dot" :class="`dot-${n}`" />
+      </div>
 
       <!-- Animated content -->
-      <div class="hero-content" :key="activeTab">
+      <div class="hero-content" :key="contentKey">
         <div class="hero-text-block">
           <h1 class="hero-title font-syne">
             <span
@@ -110,9 +147,8 @@ function selectTab(name: string) {
               :key="line"
               class="hero-title-line"
               :style="{ animationDelay: `${i * 70}ms` }"
-            >
-              {{ line }}<br />
-            </span>
+              >{{ line }}<br
+            /></span>
           </h1>
 
           <p class="hero-description font-manrope">
@@ -121,18 +157,38 @@ function selectTab(name: string) {
         </div>
 
         <div class="hero-actions">
-          <button class="hero-btn hero-btn-primary">
+          <button class="hero-btn hero-btn-primary font-manrope">
             {{ currentSlide.primaryBtn }}
           </button>
-          <button class="hero-btn hero-btn-secondary">
+          <button class="hero-btn hero-btn-secondary font-manrope">
             {{ currentSlide.secondaryBtn }}
           </button>
         </div>
-      </div>
 
-      <!-- Decorative floating dots -->
-      <div class="hero-dots" aria-hidden="true">
-        <span v-for="n in 6" :key="n" class="hero-dot" :class="`dot-${n}`" />
+        <!-- ── Slide indicators (bottom-left, inside content) ── -->
+        <div
+          class="hero-indicators"
+          role="tablist"
+          aria-label="Slayd navigatsiyasi"
+        >
+          <button
+            v-for="(slide, i) in slides"
+            :key="slide.name"
+            role="tab"
+            :aria-selected="current === i"
+            :aria-label="`Slayd ${i + 1}`"
+            class="indicator-btn"
+            :class="{ 'is-active': current === i }"
+            @click="selectSlide(i)"
+          >
+            <span class="indicator-track">
+              <span
+                class="indicator-fill"
+                :style="current === i ? { width: `${progress}%` } : {}"
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
       <!-- Hero image -->
@@ -152,114 +208,32 @@ function selectTab(name: string) {
   margin-top: 26px;
 }
 
-/* ── Tab Bar ─────────────────────────────────────────────── */
-.hero-tabs-bar {
-  display: flex;
-  gap: 6px;
-  padding: 0 52px 0;
-  margin-bottom: -18px;
-  position: relative;
-  z-index: 2;
-}
-
-.hero-tab-btn {
-  flex: 1 1 0;
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 30px 0 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  outline: none;
-}
-
-.hero-tab-line {
-  display: block;
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
-  transition:
-    background 0.3s ease,
-    transform 0.3s ease;
-  transform-origin: left center;
-}
-
-.hero-tab-btn.is-active .hero-tab-line {
-  background: #ffffff;
-  transform: scaleX(1);
-}
-
-.hero-tab-btn:hover:not(.is-active) .hero-tab-line {
-  background: rgba(255, 255, 255, 0.6);
-}
-
-/* Tooltip */
-.hero-tab-tooltip {
-  position: absolute;
-  bottom: calc(100% - 22px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  background: rgba(0, 0, 0, 0.72);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 8px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-  font-family: "Manrope", sans-serif;
-}
-
-.hero-tab-btn:hover .hero-tab-tooltip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 /* ── Card ────────────────────────────────────────────────── */
 .hero-card {
   position: relative;
-  min-height: 420px;
+  min-height: 460px;
   overflow: hidden;
   border-radius: 28px;
-  padding: 52px 0 0 52px;
-  background: linear-gradient(
-    96deg,
-    #204407 0%,
-    #0f6a70 41%,
-    #1d8278 67%,
-    #6fa83e 100%
-  );
-  transition: box-shadow 0.4s ease;
+  padding: 52px 0 48px 52px;
+  transition:
+    background 0.8s ease,
+    box-shadow 0.4s ease;
 }
 
 .hero-card:hover {
-  box-shadow: 0 32px 80px rgba(15, 106, 112, 0.35);
+  box-shadow: 0 32px 80px rgba(15, 106, 112, 0.3);
 }
 
 .hero-card.is-transitioning {
   pointer-events: none;
 }
 
-/* ── Background Overlay ──────────────────────────────────── */
+/* ── Background overlay ──────────────────────────────────── */
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(52% 80% at 12% 50%, rgba(0, 0, 0, 0.5) 0%, transparent 70%),
-    radial-gradient(
-      42% 68% at 84% 47%,
-      var(--accent, rgba(147, 226, 92, 0.32)) 0%,
-      transparent 74%
-    );
   pointer-events: none;
-  transition: background 0.5s ease;
+  transition: background 0.8s ease;
 }
 
 /* ── Floating dots ───────────────────────────────────────── */
@@ -325,7 +299,7 @@ function selectTab(name: string) {
 @keyframes floatDot {
   0%,
   100% {
-    transform: translateY(0px) scale(1);
+    transform: translateY(0) scale(1);
   }
   50% {
     transform: translateY(-18px) scale(1.05);
@@ -337,8 +311,9 @@ function selectTab(name: string) {
   position: relative;
   z-index: 2;
   max-width: 60%;
-  padding-bottom: 48px;
-
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   animation: contentIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -364,9 +339,9 @@ function selectTab(name: string) {
 .hero-title {
   margin: 0;
   color: white;
-  font-size: 35px;
+  font-size: 38px;
   font-weight: 800;
-  line-height: 70px;
+  line-height: 1.75;
   letter-spacing: -0.025em;
 }
 
@@ -389,23 +364,21 @@ function selectTab(name: string) {
 
 .hero-description {
   margin: 0;
-  max-width: 839px;
+  max-width: 560px;
   color: #f2f2f7;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: normal;
-
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.55;
   opacity: 0;
   animation: contentIn 0.45s 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 .hero-actions {
-  margin-top: 32px;
+  margin-top: 28px;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-
   opacity: 0;
   animation: contentIn 0.45s 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -418,7 +391,6 @@ function selectTab(name: string) {
   border: none;
   border-radius: 14px;
   padding: 0 26px;
-  font-family: "Manrope", sans-serif;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -434,29 +406,78 @@ function selectTab(name: string) {
 }
 
 .hero-btn-primary {
+  background: #fff;
   color: #2cb36c;
-  background: #ffffff;
 }
-
 .hero-btn-primary:hover {
-  color: #24985b;
   background: #f5f5f5;
+  color: #24985b;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
 }
 
 .hero-btn-secondary {
-  color: #ffffff;
   background: rgba(42, 129, 102, 0.75);
+  color: #fff;
 }
-
 .hero-btn-secondary:hover {
   background: rgba(35, 113, 89, 0.9);
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(35, 113, 89, 0.35);
 }
 
-/* ── Image ───────────────────────────────────────────────── */
+/* ── Slide indicators ────────────────────────────────────── */
+.hero-indicators {
+  display: flex;
+  gap: 8px;
+  margin-top: 36px;
+  opacity: 0;
+  animation: contentIn 0.45s 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.indicator-btn {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.indicator-track {
+  display: block;
+  width: 48px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+.indicator-btn.is-active .indicator-track {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.indicator-btn:hover:not(.is-active) .indicator-track {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.indicator-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #ffffff;
+  width: 0%;
+  transition: width 50ms linear;
+}
+
+/* Inactive dots — full white bar (already visited or future) */
+.indicator-btn:not(.is-active) .indicator-fill {
+  width: 0% !important;
+  transition: none;
+}
+
+/* ── Hero Image ──────────────────────────────────────────── */
 .hero-image {
   position: absolute;
   right: -60px;
@@ -468,24 +489,23 @@ function selectTab(name: string) {
   object-position: right bottom;
   pointer-events: none;
   transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
+    opacity 0.38s ease,
+    transform 0.38s ease;
 }
 
 .hero-image.image-transition {
-  opacity: 0.5;
-  transform: translateX(10px) scale(0.98);
+  opacity: 0.4;
+  transform: translateX(12px) scale(0.97);
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1200px) {
   .hero-card {
-    padding: 40px 0 0 30px;
-    min-height: 360px;
+    padding: 40px 0 40px 30px;
+    min-height: 380px;
   }
   .hero-title {
     font-size: 30px;
-    line-height: 56px;
   }
   .hero-description {
     font-size: 15px;
@@ -497,29 +517,21 @@ function selectTab(name: string) {
 }
 
 @media (max-width: 900px) {
-  .hero-tabs-bar {
-    padding: 0 18px;
-  }
-
   .hero-card {
     border-radius: 20px;
-    padding: 32px 20px 0;
+    padding: 32px 20px 32px;
     min-height: auto;
   }
-
   .hero-content {
     max-width: 100%;
-    padding-bottom: 24px;
   }
-
   .hero-title {
     font-size: 28px;
-    line-height: 48px;
+    line-height: 1.6;
   }
   .hero-description {
     font-size: 14px;
   }
-
   .hero-image {
     position: static;
     display: block;
@@ -527,17 +539,13 @@ function selectTab(name: string) {
     height: auto;
     margin: 20px auto 0;
   }
-
   .hero-actions {
-    margin-top: 20px;
     flex-direction: column;
   }
-
   .hero-btn {
     width: 100%;
     font-size: 15px;
   }
-
   .hero-dot {
     display: none;
   }

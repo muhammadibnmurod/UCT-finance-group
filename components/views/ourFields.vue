@@ -90,7 +90,7 @@ const revealOrder: Record<string, number> = {
     ref="sectionRef"
     :class="{ 'is-visible': visible }"
   >
-    <div class="mx-auto w-full max-w-[1160px] px-[30px]">
+    <div class="mx-auto w-full max-w-[1220px] px-4">
       <!-- Header -->
       <div class="fields-header">
         <p class="fields-eyebrow font-syne">QAYSI SOHALAR BILAN ISHLAYMIZ?</p>
@@ -238,6 +238,7 @@ const revealOrder: Record<string, number> = {
   position: relative;
   border-radius: 22px;
   background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
   padding: 22px 20px 0;
   overflow: hidden;
   cursor: default;

@@ -1,16 +1,18 @@
 <template>
   <div>
-    <div class="mx-auto w-full max-w-[1600px] px-28 py-4">
+    <div class="mx-auto w-full max-w-[1220px] px-4 py-4">
       <Header />
       <Main />
     </div>
-    <WorksResult class="mt-10 w-screen" />
-    <our-direction class="px-28 py-4 !bg-white" />
-    <our-fields class="mx-auto w-full px-28 py-4 !bg-white" />
-    <Sohalar class="px-28 py-4 mt-10 mb-10 !bg-white" />
-    <why-u-c-t class="px-28 py-4" />
-    <our-work class="mt-20 px-28 py-4 !bg-white" />
-    <uctwhy class="mt-20 px-28 py-4" />
+    <WorksResult class="mt-10" />
+    <our-direction class="py-4 !bg-white" />
+    <our-fields class="py-4 !bg-white" />
+    <div class="mx-auto w-full max-w-[1220px] px-4 py-4 mt-10 mb-10">
+      <Sohalar class="!bg-white" />
+    </div>
+    <why-u-c-t class="py-4" />
+    <our-work class="mt-20 py-4 !bg-white" />
+    <uctwhy class="mt-20 py-4" />
   </div>
 </template>
 
