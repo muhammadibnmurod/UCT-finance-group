@@ -26,6 +26,19 @@ export default defineNuxtConfig({
     features: ["LabelLayout", "UniversalTransition"]
   },
 
+  app: {
+    head: {
+      title: "UCT-Finance-Group",
+      meta: [
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+      ],
+      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
+    },
+    pageTransition: { name: "page", mode: "out-in" },
+    layoutTransition: { name: "layout", mode: "out-in" }
+  },
+
   css: [
     "~/assets/styles/main.css",
     "~/assets/styles/fonts.css",
@@ -44,6 +57,7 @@ export default defineNuxtConfig({
     host: "0.0.0.0",
     port: 8080,
   },
+
 
   components: [
     { path: "~/components", pathPrefix: false },
