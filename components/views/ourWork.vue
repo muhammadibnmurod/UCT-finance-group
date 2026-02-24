@@ -115,7 +115,12 @@ onUnmounted(() => observer?.disconnect());
 </script>
 
 <template>
-  <section class="our-work" ref="sectionRef" :class="{ 'is-visible': visible }">
+  <section
+    id="pricing"
+    class="our-work"
+    ref="sectionRef"
+    :class="{ 'is-visible': visible }"
+  >
     <div class="mx-auto w-full max-w-[1220px] px-4">
       <!-- Header -->
       <div class="pricing-header">

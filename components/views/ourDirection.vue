@@ -86,7 +86,7 @@ function cardDelay(index: number) {
 </script>
 
 <template>
-  <section class="our-direction py-16" ref="sectionRef">
+  <section id="about" class="our-direction py-16" ref="sectionRef">
     <div class="mx-auto w-full max-w-[1220px] px-4">
       <!-- Header -->
       <div class="section-header">
@@ -195,8 +195,8 @@ function cardDelay(index: number) {
   /* Entrance */
   opacity: 0;
   transform: translateY(32px) scale(0.97);
-  transition: //opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms),
-    //transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms),
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms),
     box-shadow 0.3s ease;
 }
 

@@ -33,6 +33,23 @@ function setActive(i: number) {
   mobileOpen.value = false;
 }
 
+function scrollToSection(href: string) {
+  if (!href.startsWith("#")) return;
+  const target = document.querySelector(href) as HTMLElement | null;
+  if (!target) return;
+
+  const header = document.querySelector(".site-header") as HTMLElement | null;
+  const offset = (header?.offsetHeight ?? 0) + 8;
+  const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+}
+
+function onNavClick(i: number, href: string) {
+  setActive(i);
+  scrollToSection(href);
+}
+
 onMounted(() => window.addEventListener("scroll", onScroll, { passive: true }));
 onUnmounted(() => window.removeEventListener("scroll", onScroll));
 </script>
@@ -57,7 +74,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
           :href="item.href"
           class="nav-link font-manrope"
           :class="{ 'is-active': activeIndex === i }"
-          @click.prevent="setActive(i)"
+          @click.prevent="onNavClick(i, item.href)"
         >
           {{ item.label }}
           <span class="nav-indicator" aria-hidden="true" />
@@ -118,7 +135,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
           class="mobile-link font-manrope"
           :class="{ 'is-active': activeIndex === i }"
           :style="{ animationDelay: `${i * 45}ms` }"
-          @click.prevent="setActive(i)"
+          @click.prevent="onNavClick(i, item.href)"
         >
           {{ item.label }}
         </a>
