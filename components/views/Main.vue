@@ -211,7 +211,7 @@ function selectSlide(i: number) {
 /* ── Card ────────────────────────────────────────────────── */
 .hero-card {
   position: relative;
-  min-height: 460px;
+  height: 560px;
   overflow: hidden;
   border-radius: 28px;
   padding: 52px 0 48px 52px;
@@ -310,6 +310,7 @@ function selectSlide(i: number) {
 .hero-content {
   position: relative;
   z-index: 2;
+  height: auto;
   max-width: 60%;
   display: flex;
   flex-direction: column;
@@ -516,6 +517,12 @@ function selectSlide(i: number) {
   }
 }
 
+@media (max-width: 1024px) {
+  .hero-image {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .hero-card {
     border-radius: 20px;
@@ -533,11 +540,7 @@ function selectSlide(i: number) {
     font-size: 14px;
   }
   .hero-image {
-    position: static;
-    display: block;
-    width: min(80%, 360px);
-    height: auto;
-    margin: 20px auto 0;
+    display: none;
   }
   .hero-actions {
     flex-direction: column;
