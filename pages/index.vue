@@ -14,12 +14,9 @@
     <!-- <uctwhy class="mt-20 py-4" /> -->
     <NewPage class="mt-20 py-4" />
     <OurEmployee class="mt-20 py-4 !bg-white" />
-    <AboutUS class="mt-20 py-4 !bg-white" />
+    <AboutUs class="mt-20 py-4 !bg-white" />
+    <Footer class="bg-[#F2F2F7]" />
   </div>
 </template>
 
-<script setup lang="ts">
-import OurFields from "@/components/views/ourFields.vue";
-import WhyUCT from "@/components/views/whyUCT.vue";
-import NewPage from "@/components/views/NewPage.vue";
-</script>
+<script setup lang="ts"></script>
