@@ -140,9 +140,9 @@ onUnmounted(() => observer?.disconnect());
             <span class="avatar-ring" aria-hidden="true" />
           </div>
 
-          <h3 class="member-name font-syne">{{ member.name }}</h3>
-          <p class="member-role font-syne">{{ member.role }}</p>
-          <p class="member-bio font-syne">{{ member.bio }}</p>
+          <h3 class="member-name font-inter">{{ member.name }}</h3>
+          <p class="member-role font-inter">{{ member.role }}</p>
+          <p class="member-bio font-inter">{{ member.bio }}</p>
 
           <!-- Social links -->
           <div class="member-socials">
@@ -176,18 +176,21 @@ onUnmounted(() => observer?.disconnect());
 }
 
 .employee-title {
-  margin: 0;
-  color: #39b270;
-  font-size: 40px;
+  color: var(--Text-text-brand, #39b270);
+  text-align: center;
+  font-family: Syne;
+  font-size: 32px;
+  font-style: normal;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: normal;
+  letter-spacing: 1.28px;
 }
 
 .employee-subtitle {
   max-width: 680px;
   margin: 16px auto 0;
   color: #18181d;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -273,7 +276,7 @@ onUnmounted(() => observer?.disconnect());
 /* ── Text ────────────────────────────────────────────────── */
 .member-name {
   margin: 20px 0 0;
-  color: #1c1c25;
+  color: #181D27;
   font-size: 17px;
   font-weight: 700;
   line-height: 1.25;
@@ -281,18 +284,21 @@ onUnmounted(() => observer?.disconnect());
 
 .member-role {
   margin: 4px 0 0;
-  color: #6f4ce2;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
+  color: #6941C6;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
 }
 
 .member-bio {
   margin: 12px 0 0;
-  color: #5d5d68;
-  font-size: 14px;
+  color: #535862;
+  max-width: 210px;
+  text-align: center;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.55;
+  line-height: 24px;
   flex: 1;
 }
 

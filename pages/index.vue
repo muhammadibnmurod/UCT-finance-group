@@ -14,6 +14,7 @@
     <!-- <uctwhy class="mt-20 py-4" /> -->
     <NewPage class="mt-20 py-4" />
     <OurEmployee class="mt-20 py-4 !bg-white" />
+    <AboutUS class="mt-20 py-4 !bg-white" />
   </div>
 </template>
 

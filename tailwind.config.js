@@ -73,7 +73,8 @@ export default {
       fontFamily: {
         geist: ["Geist", "sans-serif"],
         manrope: ['"Manrope"', "sans-serif"],
-        syne: ['"Syne"', "sans-serif"]
+        syne: ['"Syne"', "sans-serif"],
+        inter: ['"Inter"', "sans-serif"]
       }
     }
   },
