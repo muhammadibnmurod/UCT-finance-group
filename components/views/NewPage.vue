@@ -1,50 +1,66 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface Testimonial {
   id: number;
   text: string;
   author: string;
   role: string;
   initials: string;
+  color: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
 const testimonials: Testimonial[] = [
   {
     id: 1,
     text: "UCT Finance Group bilan ishlashni boshlaganimizdan so'ng moliyaviy tartib va nazorat kuchaydi. Qarorlar endi taxmin asosida emas, aniq raqamlar asosida qabul qilinadi.",
     author: "Habibxonov Hikmatullo",
     role: "Biznes egasi",
-    initials: "HH"
+    initials: "HH",
+    color: "#b7c5a8"
   },
   {
     id: 2,
     text: "Ular bilan hamkorlik qilish biznesimizda aniqlik va barqarorlik olib keldi. Hisobotlar tushunarli va o'z vaqtida taqdim etiladi.",
     author: "Azizbek Karimov",
     role: "Direktor",
-    initials: "AK"
+    initials: "AK",
+    color: "#c4a882"
   },
   {
     id: 3,
     text: "Moliyaviy masalalarda ishonchli va professional yondashuv. Jamoa har doim aloqada va savollarimga tez javob beradi.",
     author: "Dilshod Raximov",
     role: "Moliyaviy menejer",
-    initials: "DR"
+    initials: "DR",
+    color: "#8fafc4"
+  },
+  {
+    id: 4,
+    text: "Biznesimizning moliyaviy holatini tushunish osonlashdi. UCT jamoasi professionallik va ishonchlilik bilan ajralib turadi.",
+    author: "Jasur Toshmatov",
+    role: "Tadbirkor",
+    initials: "JT",
+    color: "#a8b5c4"
+  },
+  {
+    id: 5,
+    text: "Moliyaviy hisobotlar va tahlillar orqali biznesimizda sezilarli o'zgarishlar ro'y berdi. Juda minnatdormiz.",
+    author: "Sarvar Umarov",
+    role: "Bosh direktor",
+    initials: "SU",
+    color: "#c4b8a8"
   }
 ];
 
-// ─── State ────────────────────────────────────────────────────────────────────
 const activeIndex = ref(0);
 const isTransitioning = ref(false);
 const contentKey = ref(0);
 const activeTestimonial = computed(() => testimonials[activeIndex.value]);
 
-// ─── Auto-play + progress ─────────────────────────────────────────────────────
-const progress = ref(0);
 const INTERVAL = 6000;
 const TICK = 50;
+const progress = ref(0);
 let progressTimer: ReturnType<typeof setInterval> | null = null;
 let slideTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -60,7 +76,7 @@ function goTo(index: number) {
     activeIndex.value = index;
     contentKey.value++;
     isTransitioning.value = false;
-  }, 340);
+  }, 300);
 }
 
 function startCycle() {
@@ -78,7 +94,17 @@ function startCycle() {
 function selectDot(i: number) {
   clearTimers();
   goTo(i);
-  setTimeout(startCycle, 340);
+  setTimeout(startCycle, 300);
+}
+
+function prev() {
+  const i = (activeIndex.value - 1 + testimonials.length) % testimonials.length;
+  selectDot(i);
+}
+
+function next() {
+  const i = (activeIndex.value + 1) % testimonials.length;
+  selectDot(i);
 }
 
 onMounted(startCycle);
@@ -87,71 +113,96 @@ onUnmounted(clearTimers);
 
 <template>
   <section class="testimonials" id="clients">
-    <!-- Decorative background blobs -->
-    <span class="bg-blob blob-1" aria-hidden="true" />
-    <span class="bg-blob blob-2" aria-hidden="true" />
-
     <div class="t-container">
       <!-- Header -->
       <div class="t-header">
         <h2 class="t-title font-syne">Mijozlar biz haqimizda</h2>
-        <p class="t-subtitle font-syne">
+        <p class="t-subtitle font-manrope">
           Biz bilan ishlash — bu oddiy xizmat emas, bu uzoq muddatli moliyaviy
           hamkorlik.
         </p>
       </div>
 
-      <!-- Quote card -->
-      <div class="quote-card" :class="{ 'is-transitioning': isTransitioning }">
-        <!-- Big decorative quote mark -->
-        <span class="quote-mark" aria-hidden="true">"</span>
+      <!-- Quote area with arrow buttons -->
+      <div class="quote-area">
+        <!-- Prev arrow -->
+        <button class="arrow-btn" aria-label="Oldingi" @click="prev">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
 
-        <!-- Content animates on key change -->
-        <div class="quote-inner" :key="contentKey">
-          <blockquote class="quote-text font-syne">
-            {{ activeTestimonial.text }}
-          </blockquote>
-
-          <div class="author-row">
-            <span class="author-avatar font-syne">
-              {{ activeTestimonial.initials }}
-            </span>
-            <div class="author-info">
-              <p class="author-name font-syne">
-                {{ activeTestimonial.author }}
-              </p>
-              <p class="author-role font-manrope">
-                {{ activeTestimonial.role }}
-              </p>
-            </div>
-          </div>
+        <!-- Quote text -->
+        <div
+          class="quote-body"
+          :class="{ 'is-transitioning': isTransitioning }"
+          :key="contentKey"
+        >
+          <p class="quote-text font-syne">"{{ activeTestimonial.text }}"</p>
+          <p class="author-name font-manrope">{{ activeTestimonial.author }}</p>
         </div>
+
+        <!-- Next arrow -->
+        <button class="arrow-btn" aria-label="Keyingi" @click="next">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 18l6-6-6-6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <!-- Progress dot indicators -->
+      <!-- Avatar dots navigation -->
       <div
-        class="dots"
+        class="avatar-nav"
         role="tablist"
-        aria-label="Mijozlar fikrlari navigatsiyasi"
+        aria-label="Mijozlar navigatsiyasi"
       >
         <button
           v-for="(t, i) in testimonials"
           :key="t.id"
           role="tab"
           :aria-selected="i === activeIndex"
-          :aria-label="`${i + 1}-fikr`"
-          class="dot-btn"
+          :aria-label="`${t.author}`"
+          class="avatar-btn"
           :class="{ 'is-active': i === activeIndex }"
           @click="selectDot(i)"
         >
-          <span class="dot-track">
-            <span
-              class="dot-fill"
-              :style="
-                i === activeIndex ? { width: `${progress}%` } : { width: '0%' }
-              "
-            />
+          <span
+            class="avatar-circle font-syne"
+            :style="{ background: t.color }"
+          >
+            {{ t.initials }}
           </span>
+          <!-- progress ring on active -->
+          <svg
+            v-if="i === activeIndex"
+            class="avatar-progress"
+            viewBox="0 0 56 56"
+          >
+            <circle
+              cx="28"
+              cy="28"
+              r="26"
+              fill="none"
+              stroke="#39b270"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-dasharray="163.4"
+              :stroke-dashoffset="163.4 - (163.4 * progress) / 100"
+              transform="rotate(-90 28 28)"
+            />
+          </svg>
         </button>
       </div>
     </div>
@@ -161,302 +212,255 @@ onUnmounted(clearTimers);
 <style scoped lang="css">
 /* ── Section ─────────────────────────────────────────────── */
 .testimonials {
-  position: relative;
-  background: #f7f8f9;
+  background: #f0f2f5;
   border-radius: 28px;
-  padding: 72px 24px;
+  padding: 72px 24px 64px;
   overflow: hidden;
-}
-
-/* ── Blobs ───────────────────────────────────────────────── */
-.bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(80px);
-  animation: blobDrift 14s ease-in-out infinite;
-}
-
-.blob-1 {
-  width: 360px;
-  height: 360px;
-  background: rgba(57, 178, 112, 0.08);
-  top: -100px;
-  left: -80px;
-}
-.blob-2 {
-  width: 280px;
-  height: 280px;
-  background: rgba(57, 178, 112, 0.06);
-  bottom: -80px;
-  right: -60px;
-  animation-delay: 5s;
-  animation-duration: 18s;
-}
-
-@keyframes blobDrift {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  40% {
-    transform: translate(20px, -16px) scale(1.05);
-  }
-  70% {
-    transform: translate(-12px, 10px) scale(0.96);
-  }
 }
 
 /* ── Container ───────────────────────────────────────────── */
 .t-container {
-  position: relative;
-  z-index: 1;
   max-width: 860px;
   margin: 0 auto;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
 /* ── Header ──────────────────────────────────────────────── */
 .t-header {
+  text-align: center;
+  margin-bottom: 52px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 44px;
 }
 
 .t-title {
   margin: 0;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 700;
   color: #39b270;
 }
 
 .t-subtitle {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
-  color: #000;
-}
-
-/* ── Quote card ──────────────────────────────────────────── */
-.quote-card {
-  position: relative;
-  background: #fff;
-  border-radius: 24px;
-  padding: 48px 48px 40px;
-  text-align: left;
-  overflow: hidden;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.06),
-    0 1px 4px rgba(0, 0, 0, 0.04);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-.quote-card:hover {
-  box-shadow:
-    0 12px 40px rgba(57, 178, 112, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.05);
-  transform: translateY(-3px);
-}
-
-.quote-card.is-transitioning {
-  opacity: 0.55;
-  transform: scale(0.99);
-  pointer-events: none;
-}
-
-/* ── Decorative quote mark ───────────────────────────────── */
-.quote-mark {
-  position: absolute;
-  top: 8px;
-  left: 28px;
-  font-size: 130px;
-  line-height: 1;
-  color: #39b270;
-  opacity: 0.07;
-  font-family: Georgia, serif;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* ── Animated content ────────────────────────────────────── */
-.quote-inner {
-  animation: quoteIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes quoteIn {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ── Quote text ──────────────────────────────────────────── */
-.quote-text {
-  margin: 0 0 32px;
-  font-size: 20px;
-  line-height: 1.65;
   color: #1a1a1a;
-  font-weight: 400;
-  font-style: normal;
+  line-height: 1.5;
 }
 
-/* ── Author ──────────────────────────────────────────────── */
-.author-row {
+/* ── Quote area ──────────────────────────────────────────── */
+.quote-area {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
+  margin-bottom: 44px;
 }
 
-.author-avatar {
+/* ── Arrow buttons ───────────────────────────────────────── */
+.arrow-btn {
   flex-shrink: 0;
-  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid #d0d5dc;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #39b270, #2a8a55);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  color: #555;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.author-info {
+.arrow-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.arrow-btn:hover {
+  border-color: #39b270;
+  background: #39b270;
+  color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(57, 178, 112, 0.3);
+}
+
+.arrow-btn:active {
+  transform: scale(0.95);
+}
+
+/* ── Quote body ──────────────────────────────────────────── */
+.quote-body {
+  flex: 1;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 20px;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.quote-body.is-transitioning {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.quote-text {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: #1a1a1a;
+  font-style: normal;
 }
 
 .author-name {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #111;
-}
-
-.author-role {
-  margin: 0;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 400;
   color: #9aa0a6;
+  letter-spacing: 0.3px;
 }
 
-/* ── Dots ────────────────────────────────────────────────── */
-.dots {
+/* ── Avatar navigation ───────────────────────────────────── */
+.avatar-nav {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 28px;
 }
 
-.dot-btn {
+.avatar-btn {
+  position: relative;
   background: none;
   border: none;
-  padding: 6px 0;
+  padding: 0;
   cursor: pointer;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dot-track {
-  display: block;
+.avatar-btn:not(.is-active) {
+  opacity: 0.55;
+  transform: scale(0.82);
+}
+
+.avatar-btn.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.avatar-btn:hover:not(.is-active) {
+  opacity: 0.85;
+  transform: scale(0.9);
+}
+
+.avatar-circle {
   width: 44px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(57, 178, 112, 0.2);
-  overflow: hidden;
-  transition: background 0.3s ease;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.dot-btn.is-active .dot-track {
-  background: rgba(57, 178, 112, 0.3);
-}
-.dot-btn:hover:not(.is-active) .dot-track {
-  background: rgba(57, 178, 112, 0.4);
-}
-
-.dot-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: #39b270;
-  width: 0%;
-  transition: width 50ms linear;
+/* SVG progress ring */
+.avatar-progress {
+  position: absolute;
+  inset: 0;
+  width: 56px;
+  height: 56px;
+  z-index: 2;
+  pointer-events: none;
+  transition: stroke-dashoffset 50ms linear;
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .t-container {
-    max-width: 100%;
-  }
-}
-
 @media (max-width: 768px) {
   .testimonials {
-    padding: 52px 16px;
+    padding: 48px 16px 52px;
     border-radius: 20px;
   }
   .t-title {
     font-size: 26px;
   }
   .t-subtitle {
-    font-size: 17px;
-  }
-  .quote-card {
-    padding: 32px 24px 28px;
+    font-size: 16px;
   }
   .quote-text {
     font-size: 17px;
   }
-  .quote-mark {
-    font-size: 80px;
-    top: 6px;
-    left: 18px;
+  .quote-area {
+    gap: 12px;
   }
-  .dot-track {
-    width: 34px;
+  .arrow-btn {
+    width: 38px;
+    height: 38px;
+  }
+  .arrow-btn svg {
+    width: 15px;
+    height: 15px;
   }
 }
 
 @media (max-width: 480px) {
   .testimonials {
-    padding: 40px 12px;
+    padding: 36px 12px 44px;
     border-radius: 16px;
   }
   .t-title {
     font-size: 22px;
   }
   .t-subtitle {
-    font-size: 15px;
-  }
-  .t-header {
-    margin-bottom: 28px;
-  }
-  .quote-card {
-    padding: 26px 16px 22px;
-    border-radius: 18px;
+    font-size: 14px;
   }
   .quote-text {
     font-size: 15px;
-    line-height: 1.6;
-    margin-bottom: 24px;
+    line-height: 1.65;
   }
-  .author-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 13px;
+  .t-header {
+    margin-bottom: 36px;
   }
-  .author-name {
-    font-size: 14px;
+  .arrow-btn {
+    width: 34px;
+    height: 34px;
   }
-  .dot-track {
-    width: 28px;
+  .avatar-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .avatar-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 11px;
+  }
+  .avatar-progress {
+    width: 48px;
+    height: 48px;
   }
 }
 </style>

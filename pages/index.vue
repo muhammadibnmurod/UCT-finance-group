@@ -1,7 +1,6 @@
 <template>
-  <div>
+  <div class="pt-24">
     <div class="mx-auto w-full max-w-[1220px] px-4 py-4">
-      <Header />
       <Main />
     </div>
     <WorksResult class="mt-10" />
@@ -18,7 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import Header from "~/components/layout/Header.vue";
 import OurFields from "@/components/views/ourFields.vue";
 import WhyUCT from "@/components/views/whyUCT.vue";
 import NewPage from "@/components/views/NewPage.vue";

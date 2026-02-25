@@ -2,13 +2,11 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import Logo from "@/assets/images/Logo.png";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface NavItem {
   label: string;
   href: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
 const navItems: NavItem[] = [
   { label: "Bosh sahifa", href: "#home" },
   { label: "Biz haqimizda", href: "#about" },
@@ -19,7 +17,6 @@ const navItems: NavItem[] = [
   { label: "Kontaktlar", href: "#contact" }
 ];
 
-// ─── Scroll state ─────────────────────────────────────────────────────────────
 const isScrolled = ref(false);
 const activeIndex = ref(0);
 const mobileOpen = ref(false);
@@ -28,29 +25,26 @@ function onScroll() {
   isScrolled.value = window.scrollY > 24;
 }
 
-function setActive(i: number) {
-  activeIndex.value = i;
-  mobileOpen.value = false;
-}
-
 function scrollToSection(href: string) {
   if (!href.startsWith("#")) return;
   const target = document.querySelector(href) as HTMLElement | null;
   if (!target) return;
-
   const header = document.querySelector(".site-header") as HTMLElement | null;
   const offset = (header?.offsetHeight ?? 0) + 8;
   const top = target.getBoundingClientRect().top + window.scrollY - offset;
-
   window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
 }
 
 function onNavClick(i: number, href: string) {
-  setActive(i);
+  activeIndex.value = i;
+  mobileOpen.value = false;
   scrollToSection(href);
 }
 
-onMounted(() => window.addEventListener("scroll", onScroll, { passive: true }));
+onMounted(() => {
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+});
 onUnmounted(() => window.removeEventListener("scroll", onScroll));
 </script>
 
@@ -58,11 +52,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   <header class="site-header" :class="{ 'is-scrolled': isScrolled }">
     <div class="header-inner">
       <!-- Logo -->
-      <a
-        href="#"
-        class="header-logo"
-        aria-label="UCT Finance Group — bosh sahifa"
-      >
+      <a href="#" class="header-logo" aria-label="UCT Finance Group">
         <img :src="Logo" alt="UCT Finance Group" class="logo-img" />
       </a>
 
@@ -105,7 +95,6 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
           </svg>
         </button>
 
-        <!-- Hamburger (mobile) -->
         <button
           type="button"
           class="hamburger"
@@ -119,7 +108,6 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
         </button>
       </div>
     </div>
-
     <!-- Mobile menu -->
     <Transition name="mobile-menu">
       <nav
@@ -147,16 +135,18 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
 <style scoped lang="css">
 /* ── Header shell ────────────────────────────────────────── */
 .site-header {
-  position: sticky;
-  top: 0;
+  --header-height: 80px;
+  position: relative;
   z-index: 100;
   width: 100%;
-  padding: 12px 0;
-  transition: padding 0.35s ease;
+  padding: 0;
+  min-height: var(--header-height);
 }
 
-.site-header.is-scrolled {
-  padding: 6px 0;
+@media (max-width: 640px) {
+  .site-header {
+    --header-height: 68px;
+  }
 }
 
 /* ── Inner bar ───────────────────────────────────────────── */
@@ -164,24 +154,29 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: var(--header-height);
   border-radius: 28px;
-  background: #edecef;
-  padding: 16px 25px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  background: rgba(237, 236, 239, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 2px 8px rgba(16, 24, 40, 0.06),
+    0 0 0 0.5px rgba(255, 255, 255, 0.4) inset;
   transition:
-    padding 0.35s ease,
     box-shadow 0.35s ease,
     background 0.35s ease;
 }
 
 .site-header.is-scrolled .header-inner {
-  padding: 12px 20px;
-  background: rgba(237, 236, 239, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(237, 236, 239, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.04);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 0.5px rgba(255, 255, 255, 0.5) inset;
 }
 
 /* ── Logo ────────────────────────────────────────────────── */
@@ -199,17 +194,9 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
 }
 
 .logo-img {
-  height: 60px;
-  width: 124px;
-  object-fit: contain;
-  transition:
-    height 0.35s ease,
-    width 0.35s ease;
-}
-
-.site-header.is-scrolled .logo-img {
   height: 48px;
   width: 100px;
+  object-fit: contain;
 }
 
 /* ── Desktop nav ─────────────────────────────────────────── */
@@ -218,8 +205,8 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   flex: 1;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin: 0 24px;
+  gap: 2px;
+  margin: 0 16px;
 }
 
 @media (max-width: 1024px) {
@@ -231,10 +218,10 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
 .nav-link {
   position: relative;
   display: inline-block;
-  padding: 6px 10px;
-  font-size: 16px;
+  padding: 12px 10px 6px;
+  font-size: 15px;
   font-weight: 500;
-  color: #2f2e3a;
+  color: #9e9ea8;
   text-decoration: none;
   border-radius: 10px;
   transition:
@@ -252,17 +239,17 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   color: #1bae66;
 }
 
-/* Animated underline indicator */
+/* Top full-width indicator */
 .nav-indicator {
   position: absolute;
-  bottom: 2px;
-  left: 10px;
-  right: 10px;
-  height: 2px;
-  border-radius: 99px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 99px 99px 0 0;
   background: #1bae66;
   transform: scaleX(0);
-  transform-origin: center;
+  transform-origin: left center;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -288,21 +275,15 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   cursor: pointer;
   border-radius: 14px;
   background: #2cb36c;
-  padding: 14px 28px;
-  font-size: 16px;
+  padding: 13px 26px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
   transition:
     background 0.25s ease,
     transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.25s ease,
-    padding 0.35s ease;
-}
-
-.site-header.is-scrolled .cta-btn {
-  padding: 10px 22px;
-  font-size: 15px;
+    box-shadow 0.25s ease;
 }
 
 .cta-btn:hover {
@@ -332,9 +313,6 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   }
   .cta-btn {
     padding: 10px 14px;
-  }
-  .cta-arrow {
-    display: block;
   }
 }
 
@@ -368,7 +346,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   display: block;
   height: 2px;
   border-radius: 2px;
-  background: #2f2e3a;
+  background: #9e9ea8;
   transform-origin: center;
   transition:
     transform 0.3s ease,
@@ -400,9 +378,10 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   padding: 12px 16px 16px;
   margin-top: 8px;
   border-radius: 20px;
-  background: rgba(237, 236, 239, 0.96);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(237, 236, 239, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
@@ -411,13 +390,12 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   padding: 13px 14px;
   font-size: 17px;
   font-weight: 500;
-  color: #2f2e3a;
+  color: #9e9ea8;
   text-decoration: none;
   border-radius: 12px;
   transition:
     color 0.2s ease,
     background 0.2s ease;
-
   opacity: 0;
   animation: mobileItemIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
